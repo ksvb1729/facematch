@@ -18,7 +18,7 @@ crayons==0.4.0
 cycler==0.12.1
 Cython==3.0.12
 deepface==0.0.93
-dlib==19.24.8
+dlib==19.22.0 --find-links https://github.com/davisking/dlib/releases/tag/v19.22.0
 easydict==1.13
 et-xmlfile==1.1.0
 eval-type-backport==0.2.2

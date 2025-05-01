@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Photo Match POC</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-light: #dbeafe;
+      --primary-dark: #1d4ed8;
+      --success: #16a34a;
+      --success-light: #dcfce7;
+      --error: #dc2626;
+      --error-light: #fee2e2;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --bg: #f8fafc;
+      --bg-card: #ffffff;
+      --border: #e2e8f0;
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text);
+      background-color: var(--bg);
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--primary-dark);
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    p {
+      margin-bottom: 0.75rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-item {
+      padding: 1rem;
+      background-color: var(--primary-light);
+      border-radius: var(--radius);
+    }
+
+    .info-item h3 {
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-item p {
+      font-size: 0.875rem;
+      margin-bottom: 0;
+    }
+
+    .impact-banner {
+      background-color: var(--primary-light);
+      border-left: 3px solid var(--primary);
+      padding: 0.75rem 1rem;
+      border-radius: 4px;
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .photo-container {
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg);
+      border-radius: var(--radius);
+      padding: 1rem;
+      border: 1px solid var(--border);
+    }
+
+    .photo-container h3 {
+      margin-bottom: 0.75rem;
+      color: var(--primary-dark);
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    input[type="file"] {
+      width: 100%;
+      padding: 0.5rem;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      max-width: 200px;
+    }
+
+    button {
+      padding: 0.5rem 0.75rem;
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: var(--primary-dark);
+    }
+
+    button:disabled {
+      background-color: var(--text-light);
+      cursor: not-allowed;
+    }
+
+    #result {
+      padding: 1rem;
+      border-radius: var(--radius);
+      background-color: var(--primary-light);
+      min-height: 50px;
+      font-size: 0.875rem;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    .thumbnail {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background-color: var(--bg);
+      margin-top: 0.5rem;
+    }
+
+    .threshold-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .threshold-value {
+      font-weight: 500;
+      min-width: 2.5rem;
+    }
+
+    .note {
+      font-size: 0.75rem;
+      color: var(--text-light);
+    }
+
+    .tech-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .tech-item {
+      padding: 1rem;
+      background-color: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .tech-item h4 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .tech-item p {
+      font-size: 0.8rem;
+      margin-bottom: 0;
+    }
+
+    .use-case {
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .use-case:last-child {
+      border-bottom: none;
+    }
+
+    .use-case h4 {
+      color: var(--primary);
+    }
+
+    .use-case p {
+      font-size: 0.875rem;
+    }
+
+    .tabs {
+      display: flex;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+
+    .tab {
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-light);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .photo-tabs {
+      display: flex;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .photo-tab {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-light);
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex: 1;
+      text-align: center;
+    }
+
+    .photo-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+
+    .photo-tab-content {
+      display: none;
+    }
+
+    .photo-tab-content.active {
+      display: block;
+    }
+
+    .camera-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .camera-container video {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background-color: #000;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-top: 0.75rem;
+    }
+
+    .result-card {
+      background: var(--bg);
+      padding: 0.75rem;
+      border-radius: var(--radius);
+    }
+
+    .result-card h5 {
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+
+    .result-card p {
+      margin-bottom: 0.25rem;
+      font-size: 0.8rem;
+    }
+
+    details {
+      margin-top: 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    details summary {
+      cursor: pointer;
+      padding: 0.75rem 1rem;
+      background-color: var(--bg);
+      font-weight: 500;
+      color: var(--text);
+      border-bottom: 1px solid transparent;
+    }
+
+    details[open] summary {
+      border-bottom: 1px solid var(--border);
+    }
+
+    details .details-content {
+      padding: 1rem;
+      background-color: var(--bg-card);
+    }
+
+    details pre {
+      font-size: 0.75rem;
+      background: var(--bg);
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      overflow-x: auto;
+    }
+
+    .submit-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .submit-container button {
+      min-width: 180px;
+      padding: 0.75rem 1rem;
+    }
+
+    .preview-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+
+    .preview-container button {
+      max-width: 150px;
+      margin-top: 0.75rem;
+    }
+
+    .match-result {
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .match-success {
+      background-color: var(--success-light);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+
+    .match-error {
+      background-color: var(--error-light);
+      border: 1px solid var(--error);
+      color: var(--error);
+    }
+
+    .match-result h3 {
+      margin-bottom: 0.5rem;
+      color: inherit;
+    }
+
+    .match-result p {
+      margin-bottom: 0;
+      font-weight: 500;
+    }
+
+    .raw-data {
+      margin-top: 1rem;
+      background-color: var(--bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1rem;
+    }
+
+    .raw-data h4 {
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+
+    .raw-data pre {
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      overflow-x: auto;
+    }
+
+    @media (max-width: 768px) {
+      .info-grid, .tech-grid, .photo-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .tabs {
+        padding-bottom: 0.25rem;
+      }
+      
+      .tab {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Photo Match POC</h1>
+
+  <!-- PART 1: About the Demo, Technical Information -->
+  <div class="tabs">
+    <button class="tab active" onclick="openTab('demo-info')">Demo Overview</button>
+    <button class="tab" onclick="openTab('technical-info')">Technical Details</button>
+    <button class="tab" onclick="openTab('use-cases')">Healthcare Use Cases</button>
+    <button class="tab" onclick="openTab('face-tool')">Face Comparison Tool</button>
+  </div>
+
+  <!-- Demo Overview Tab -->
+  <div id="demo-info" class="tab-content active">
+    <div class="card">
+      <h2>About This Demo</h2>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <h3>📋 Overview</h3>
+          <p>Identity verification at claim creation using facial recognition</p>
+        </div>
+        
+        <div class="info-item">
+          <h3>⚙️ How It Works</h3>
+          <p>AI compares live photo with policy photo to confirm identity</p>
+        </div>
+      </div>
+      
+      <div class="impact-banner">
+        <strong>Impact:</strong> Prevents fraudulent claims by confirming claimant's real-time identity
+      </div>
+    </div>
+    <div class="card" style="margin-top: 1.5rem;">
+      <h2>Face Match Process Overview</h2>
+      <p>The face matching process in the current setup compares facial embeddings derived from two images using the InsightFace model. Here's a breakdown of the process:</p>
+      
+      <h3>Face Detection and Embedding Extraction:</h3>
+      <p>The first step is face detection, where the InsightFace model is used to locate faces in both input images. Once faces are detected, embeddings (numerical representations) of the faces are extracted. These embeddings capture key features like the shape, contours, and geometry of facial features.</p>
+      
+      <h3>Face Comparison:</h3>
+      <p>After extracting the embeddings, the cosine similarity between the two embeddings is calculated. This similarity score indicates how close the two embeddings are in high-dimensional space.</p>
+      <p>If the similarity score is above a defined threshold, the faces are considered a match. The threshold helps decide whether the similarity is strong enough to confidently identify two faces as being from the same person.</p>
+      
+      <h3>Stability of the Face Match Process</h3>
+      <p>The face matching process is generally stable, but several factors can influence the accuracy and reliability of the results. Here are some considerations:</p>
+      
+      <h4>Image Quality:</h4>
+      <p>High-quality images with clear, well-lit, and frontal faces generally provide better accuracy in face matching. The InsightFace model is robust enough to handle some variations in lighting, but faces that are blurry, occluded, or low resolution might not generate accurate embeddings, leading to poor face matching.</p>
+      <p>Face detection and embedding extraction are most reliable when key features like the eyes, nose, and mouth are visible and sharp.</p>
+      
+      <h4>Threshold:</h4>
+      <p>The threshold used for cosine similarity plays an important role in the matching process. A higher threshold can reduce the risk of false positives but might lead to more false negatives (failing to match faces that are indeed the same person). Conversely, a lower threshold increases the likelihood of false positives (incorrectly matching faces that are not the same).</p>
+      
+      <h4>Pose and Angle:</h4>
+      <p>If the face is not frontal (e.g., side profile, tilted head), the face matching accuracy can decrease. The embeddings may not capture all the necessary facial features for accurate comparison, leading to lower similarity scores. Extreme angles or partial occlusions (e.g., faces turned away or obscured by objects) may cause mismatches.</p>
+      
+      <h4>Facial Hair and Altered Appearances:</h4>
+      <p>Facial hair (e.g., beard or mustache) or changes in appearance, such as makeup or weight loss/gain, can affect facial features. While modern models like InsightFace are quite resilient to minor changes, large differences in facial appearance (e.g., significant weight changes or plastic surgery) can lead to false negatives (the system might fail to recognize a match).</p>
+      
+      <h3>False Positives in Face Matching</h3>
+      <p>False positives in face matching occur when the system incorrectly identifies two different individuals as being the same. While the system is generally reliable, several factors can contribute to false positives:</p>
+      
+      <h4>Low Similarity but Still Above Threshold:</h4>
+      <p>Sometimes, even if two people have somewhat similar facial features, they may not actually be the same person. This could happen if the threshold is set too low, leading the system to identify two faces as a match despite their differences. Minor similarities in facial features, such as similar eye shapes or nose structures, can cause false positives in these cases.</p>
+      
+      <h4>Age or Gender Similarities:</h4>
+      <p>Age and gender play a role in facial structure, and sometimes two individuals of similar age and gender may have facial features that are difficult to differentiate. For example, two people with similar facial geometry could be matched as the same person because their features fall within a close range.</p>
+      
+      <h4>Unintentional Facial Similarity:</h4>
+      <p>There are cases where two completely different people may have similar facial characteristics (such as the same shape of eyes, nose, or jawline). This can lead to false positives, especially if the facial embeddings are close enough in the high-dimensional feature space to exceed the threshold.</p>
+      
+      <h4>Environmental Conditions:</h4>
+      <p>Environmental factors, like lighting or background, may not directly affect the embeddings, but they can affect the visual appearance of the face. For example, a person wearing a hat or having part of their face obscured by shadows in one image might still be recognized based on certain recognizable features (like their eyes or nose). If those features match well with the second image, a false positive may occur.</p>
+      
+      <h4>Changes in Appearance:</h4>
+      <p>Aging and natural changes over time can make two faces more similar in appearance, especially in images captured at different times. As people age or undergo physical changes (like losing weight or gaining muscle), their facial features might become more comparable to someone else, leading to potential false positives in face matching.</p>
+      
+      <h4>Lighting and Quality Variations:</h4>
+      <p>If the images are taken under different lighting conditions (e.g., one image in bright sunlight and another in dim lighting), it may affect the clarity of certain facial features. However, the embeddings might still appear to match if certain key features are preserved across the images, leading to a false positive despite the different lighting conditions.</p>
+    </div>
+  </div>
+
+  <!-- Technical Information Tab -->
+  <div id="technical-info" class="tab-content">
+    <div class="card">
+      <h2>Technical Implementation</h2>
+      
+      <p>This solution uses advanced facial recognition technologies to analyze faces and determine if two images show the same person.</p>
+      
+      <h3>Technologies Used</h3>
+      
+      <div class="tech-grid">
+        <div class="tech-item">
+          <h4>FastAPI (0.110.1) & Uvicorn (0.29.0)</h4>
+          <p>Web framework and server for handling API requests</p>
+        </div>
+        
+        <div class="tech-item">
+          <h4>OpenCV (4.9.0.80)</h4>
+          <p>Image handling, preprocessing and manipulation</p>
+        </div>
+        
+        <div class="tech-item">
+          <h4>NumPy (1.26.4)</h4>
+          <p>Mathematical operations for image processing</p>
+        </div>
+        
+        <div class="tech-item">
+          <h4>DeepFace (0.0.87)</h4>
+          <p>Extracts age, gender, and emotion information from images</p>
+        </div>
+      </div>
+      
+      <h3>Advanced Face Recognition</h3>
+      
+      <div class="tech-grid">
+        <div class="tech-item">
+          <h4>InsightFace (0.7.3)</h4>
+          <p>High-accuracy face embedding and comparison technology</p>
+        </div>
+        
+        <div class="tech-item">
+          <h4>ONNX Runtime (1.17.1)</h4>
+          <p>Runs the InsightFace model backend for efficient inference</p>
+        </div>
+        
+        <div class="tech-item">
+          <h4>Python-Multipart (0.0.9)</h4>
+          <p>Handles file uploads and multipart form data</p>
+        </div>
+      </div>
+      
+      <div class="impact-banner" style="margin-top: 1rem;">
+        <strong>Technical Note:</strong> The system uses InsightFace for high-accuracy face comparison, which provides superior results compared to traditional methods.
+      </div>
+    </div>
+  </div>
+
+  <!-- Healthcare Use Cases Tab -->
+  <div id="use-cases" class="tab-content">
+    <div class="card">
+      <h2>Healthcare Industry Applications</h2>
+      
+      <div class="use-case">
+        <h4>2FA for Health Payments</h4>
+        <p>Secure two-factor authentication for healthcare payment transactions</p>
+      </div>
+      
+      <div class="use-case">
+        <h4>Proof of Service for Insurers</h4>
+        <p>Verify healthcare services were delivered to the correct beneficiary</p>
+      </div>
+      
+      <div class="use-case">
+        <h4>Identity Trail Across Claims</h4>
+        <p>Maintain consistent identity verification across multiple claims</p>
+      </div>
+      
+      <div class="use-case">
+        <h4>User Feedback Verification</h4>
+        <p>Confirm feedback comes from actual patients who received treatment</p>
+      </div>
+      
+      <div class="use-case">
+        <h4>Estimated Age, Gender, Emotion Analysis</h4>
+        <p>Extract demographic and emotional data to personalize care</p>
+      </div>
+      
+      <div class="use-case">
+        <h4>Health Condition/Symptom Detection</h4>
+        <p>Identify potential health issues through facial analysis</p>
+      </div>
+      
+      <div class="use-case">
+        <h4>Episode Creation for Claim Adjudication</h4>
+        <p>Connect health records with facial data during claim submission</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Face Comparison Tool Tab -->
+  <div id="face-tool" class="tab-content">
+    <div class="card">
+      <h2>Face Comparison Tool</h2>
+      
+      <form id="faceForm" enctype="multipart/form-data">
+        <!-- Threshold slider at the top -->
+        <div class="form-group">
+          <label for="threshold">Face Match Threshold:</label>
+          <div class="threshold-container">
+            <input type="range" id="threshold" name="threshold" min="0" max="1" step="0.01" value="0.6" required oninput="updateThresholdValue()">
+            <span id="threshold-value" class="threshold-value">0.60</span>
+          </div>
+          <p class="note">Lower values are more permissive, higher values require closer matches</p>
+        </div>
+        
+        <!-- Photo upload grid - side by side -->
+        <div class="photo-grid">
+          <!-- Policy Photo -->
+          <div class="photo-container">
+            <h3>Policy Photo</h3>
+            
+            <!-- Photo tabs for upload/capture -->
+            <div class="photo-tabs">
+              <button type="button" id="policy-upload-tab-btn" class="photo-tab active" onclick="switchPolicyPhotoTab('upload')">Upload Photo</button>
+              <button type="button" id="policy-capture-tab-btn" class="photo-tab" onclick="switchPolicyPhotoTab('capture')">Capture</button>
+            </div>
+            
+            <!-- Upload tab content -->
+            <div id="policy-upload-tab" class="photo-tab-content active">
+              <input type="file" id="file1" name="file1" accept="image/*" required onchange="previewImage('file1', 'preview1')">
+            </div>
+            
+            <!-- Capture tab content -->
+            <div id="policy-capture-tab" class="photo-tab-content">
+              <div class="camera-container">
+                <video id="policy-video" autoplay playsinline></video>
+                <button type="button" id="policy-capture-button" onclick="capturePolicyPhoto()">Capture Photo</button>
+              </div>
+            </div>
+            
+            <div class="preview-container">
+              <img id="preview1" class="thumbnail" style="display:none;" alt="Policy photo preview">
+              <button type="button" id="policy-retake-button" style="display:none;" onclick="retakePolicyPhoto()">Retake Photo</button>
+            </div>
+          </div>
+          
+          <!-- Live Photo -->
+          <div class="photo-container">
+            <h3>Live Photo</h3>
+            
+            <!-- Photo tabs for upload/capture -->
+            <div class="photo-tabs">
+              <button type="button" id="live-upload-tab-btn" class="photo-tab active" onclick="switchLivePhotoTab('upload')">Upload Photo</button>
+              <button type="button" id="live-capture-tab-btn" class="photo-tab" onclick="switchLivePhotoTab('capture')">Capture</button>
+            </div>
+            
+            <!-- Upload tab content -->
+            <div id="live-upload-tab" class="photo-tab-content active">
+              <input type="file" id="file2" name="file2" accept="image/*" onchange="previewImage('file2', 'preview2')">
+            </div>
+            
+            <!-- Capture tab content -->
+            <div id="live-capture-tab" class="photo-tab-content">
+              <div class="camera-container">
+                <video id="live-video" autoplay playsinline></video>
+                <button type="button" id="live-capture-button" onclick="captureLivePhoto()">Capture Photo</button>
+              </div>
+            </div>
+            
+            <div class="preview-container">
+              <img id="preview2" class="thumbnail" style="display:none;" alt="Live photo preview">
+              <button type="button" id="live-retake-button" style="display:none;" onclick="retakeLivePhoto()">Retake Photo</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="submit-container">
+          <button type="submit">Compare Faces</button>
+        </div>
+      </form>
+      
+      <h3 style="margin-top: 1.5rem;">Result:</h3>
+      <div id="result">Results will appear here after comparison</div>
+    </div>
+  </div>
+
+  <canvas id="canvas" style="display:none;"></canvas>
+
+  <script>
+    // Tab functionality
+    function openTab(tabName) {
+      // Hide all tab contents
+      const tabContents = document.getElementsByClassName("tab-content");
+      for (let i = 0; i < tabContents.length; i++) {
+        tabContents[i].classList.remove("active");
+      }
+      
+      // Remove active class from all tabs
+      const tabs = document.getElementsByClassName("tab");
+      for (let i = 0; i < tabs.length; i++) {
+        tabs[i].classList.remove("active");
+      }
+      
+      // Show the selected tab content and mark the button as active
+      document.getElementById(tabName).classList.add("active");
+      
+      // Find and activate the corresponding tab button
+      const buttons = document.getElementsByClassName("tab");
+      for (let i = 0; i < buttons.length; i++) {
+        if (buttons[i].textContent.toLowerCase().includes(tabName.replace("-", " "))) {
+          buttons[i].classList.add("active");
+        }
+      }
+      
+      // Stop all cameras if switching away from face tool tab
+      if (tabName !== 'face-tool') {
+        stopAllCameras();
+      }
+    }
+
+    // Policy Photo tab functionality
+    function switchPolicyPhotoTab(tabName) {
+      // Update tab buttons
+      document.getElementById('policy-upload-tab-btn').classList.toggle('active', tabName === 'upload');
+      document.getElementById('policy-capture-tab-btn').classList.toggle('active', tabName === 'capture');
+      
+      // Update tab content
+      document.getElementById('policy-upload-tab').classList.toggle('active', tabName === 'upload');
+      document.getElementById('policy-capture-tab').classList.toggle('active', tabName === 'capture');
+      
+      // Start or stop camera based on selected tab
+      if (tabName === 'capture') {
+        startCamera('policy-video');
+      } else {
+        stopCamera('policy-video');
+      }
+    }
+
+    // Live Photo tab functionality
+    function switchLivePhotoTab(tabName) {
+      // Update tab buttons
+      document.getElementById('live-upload-tab-btn').classList.toggle('active', tabName === 'upload');
+      document.getElementById('live-capture-tab-btn').classList.toggle('active', tabName === 'capture');
+      
+      // Update tab content
+      document.getElementById('live-upload-tab').classList.toggle('active', tabName === 'upload');
+      document.getElementById('live-capture-tab').classList.toggle('active', tabName === 'capture');
+      
+      // Start or stop camera based on selected tab
+      if (tabName === 'capture') {
+        startCamera('live-video');
+      } else {
+        stopCamera('live-video');
+      }
+    }
+
+    // Initialize camera
+    async function startCamera(videoId) {
+      const video = document.getElementById(videoId);
+      
+      // If camera is already running, don't restart it
+      if (video.srcObject && video.srcObject.active) return;
+      
+      try {
+        const constraints = { 
+          video: { 
+            facingMode: "user",
+            width: { ideal: 640 },
+            height: { ideal: 480 }
+          } 
+        };
+        
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = stream;
+      } catch (err) {
+        console.error("Camera error:", err);
+        const tabId = videoId === 'policy-video' ? 'policy-capture-tab' : 'live-capture-tab';
+        document.getElementById(tabId).innerHTML = `
+          <p style="color: var(--error); text-align: center; padding: 1rem;">
+            Camera access failed: ${err.message}<br>
+            Please ensure you've granted camera permissions or use the upload option.
+          </p>
+        `;
+      }
+    }
+
+    // Stop camera stream
+    function stopCamera(videoId) {
+      const video = document.getElementById(videoId);
+      if (video && video.srcObject) {
+        const tracks = video.srcObject.getTracks();
+        tracks.forEach(track => track.stop());
+        video.srcObject = null;
+      }
+    }
+
+    // Stop all cameras when switching tabs
+    function stopAllCameras() {
+      stopCamera('policy-video');
+      stopCamera('live-video');
+    }
+
+    // Retake policy photo
+    function retakePolicyPhoto() {
+      // Hide the preview and retake button
+      document.getElementById('preview1').style.display = 'none';
+      document.getElementById('policy-retake-button').style.display = 'none';
+      
+      // Show the file input again
+      document.getElementById('file1').style.display = 'block';
+      
+      // Switch to capture tab
+      switchPolicyPhotoTab('capture');
+    }
+
+    // Retake live photo
+    function retakeLivePhoto() {
+      // Hide the preview and retake button
+      document.getElementById('preview2').style.display = 'none';
+      document.getElementById('live-retake-button').style.display = 'none';
+      
+      // Show the file input again
+      document.getElementById('file2').style.display = 'block';
+      
+      // Switch to capture tab
+      switchLivePhotoTab('capture');
+    }
+
+    // Capture a policy photo from the camera
+    function capturePolicyPhoto() {
+      capturePhoto('policy-video', 'file1', 'preview1', 'policy-retake-button', 'policy-upload-tab', 'policy-capture-tab');
+    }
+
+    // Capture a live photo from the camera
+    function captureLivePhoto() {
+      capturePhoto('live-video', 'file2', 'preview2', 'live-retake-button', 'live-upload-tab', 'live-capture-tab');
+    }
+
+    // Generic photo capture function
+    function capturePhoto(videoId, fileId, previewId, retakeButtonId, uploadTabId, captureTabId) {
+      const video = document.getElementById(videoId);
+      const canvas = document.getElementById("canvas");
+      const context = canvas.getContext("2d");
+      
+      // Set canvas dimensions to match video
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      // Draw the video frame to the canvas
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // Convert canvas to blob and create a file
+      canvas.toBlob(function(blob) {
+        const file = new File([blob], `captured-photo-${Date.now()}.jpg`, { type: "image/jpeg" });
+        
+        // Create a DataTransfer object to set the files property
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(file);
+        
+        // Set the file to the file input
+        const fileInput = document.getElementById(fileId);
+        fileInput.files = dataTransfer.files;
+        
+        // Show the captured thumbnail
+        const preview = document.getElementById(previewId);
+        preview.src = canvas.toDataURL('image/jpeg');
+        preview.style.display = 'block';
+        
+        // Hide the file input after capture
+        document.getElementById(fileId).style.display = 'none';
+        
+        // Show the retake button
+        document.getElementById(retakeButtonId).style.display = 'inline-block';
+        
+        // Switch back to upload tab but keep the camera tab active in the UI
+        document.getElementById(uploadTabId).classList.add('active');
+        document.getElementById(captureTabId).classList.remove('active');
+      }, 'image/jpeg', 0.9);
+    }
+
+    // Preview uploaded images
+    function previewImage(inputId, previewId) {
+      const file = document.getElementById(inputId).files[0];
+      const preview = document.getElementById(previewId);
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          
+          // Show retake button and hide file input
+          if (inputId === 'file1') {
+            document.getElementById('file1').style.display = 'none';
+            document.getElementById('policy-retake-button').style.display = 'inline-block';
+          } else if (inputId === 'file2') {
+            document.getElementById('file2').style.display = 'none';
+            document.getElementById('live-retake-button').style.display = 'inline-block';
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    
+    // Update threshold value display
+    function updateThresholdValue() {
+      const threshold = document.getElementById('threshold').value;
+      document.getElementById('threshold-value').textContent = parseFloat(threshold).toFixed(2);
+    }
+    
+    // Initialize threshold value display
+    document.addEventListener('DOMContentLoaded', function() {
+      updateThresholdValue();
+    });
+    
+    // Handle form submission
+    document.getElementById('faceForm').onsubmit = async function(event) {
+      event.preventDefault();
+      
+      const resultElement = document.getElementById('result');
+      resultElement.textContent = 'Processing...';
+      
+      const file1 = document.getElementById('file1').files[0];
+      const file2 = document.getElementById('file2').files[0];
+      const threshold = parseFloat(document.getElementById('threshold').value);
+      
+      if (!file1 || !file2) {
+        resultElement.textContent = 'Please select both images.';
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('file1', file1);
+      formData.append('file2', file2);
+      formData.append('threshold', threshold);
+      
+      try {
+        const response = await fetch('http://127.0.0.1:8000/compare-faces/', {
+          method: 'POST',
+          body: formData
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        console.log("API Response:", result); // Log the response for debugging
+        
+        // Handle the new response format
+        try {
+          // Check if we have the expected data
+          if (result) {
+            // Extract the face match result and score
+            const faceMatch = result.face_match === true || result.face_match === "true";
+            const matchScore = result.match_score;
+            
+            // Create the verdict section - only show face match verdict
+            let verdictHTML = '';
+            if (faceMatch) {
+              verdictHTML = `
+                <div class="match-result match-success">
+                  <h3>✅ Face Match Confirmed</h3>
+                  <p>Match Score: ${matchScore.toFixed(2)}%</p>
+                </div>
+              `;
+            } else {
+              verdictHTML = `
+                <div class="match-result match-error">
+                  <h3>❌ Face Match Failed</h3>
+                  <p>Match Score: ${matchScore.toFixed(2)}%</p>
+                </div>
+              `;
+            }
+            
+            // Add metadata in a collapsible section
+            let metadataHTML = '';
+            if (result.image1 && result.image2) {
+              metadataHTML = `
+                <details>
+                  <summary>Additional Metadata</summary>
+                  <div class="details-content">
+                    <div class="result-grid">
+                      <div class="result-card">
+                        <h5>Policy Photo (image1)</h5>
+                        <p><strong>Age:</strong> ${result.image1.age}</p>
+                        <p><strong>Gender:</strong> ${result.image1.gender}</p>
+                        <p><strong>Emotion:</strong> ${result.image1.dominant_emotion}</p>
+                        <p><strong>Glasses:</strong> ${result.image1.wearing_glasses ? 'Yes' : 'No'}</p>
+                      </div>
+                      <div class="result-card">
+                        <h5>Live Photo (image2)</h5>
+                        <p><strong>Age:</strong> ${result.image2.age}</p>
+                        <p><strong>Gender:</strong> ${result.image2.gender}</p>
+                        <p><strong>Emotion:</strong> ${result.image2.dominant_emotion}</p>
+                        <p><strong>Glasses:</strong> ${result.image2.wearing_glasses ? 'Yes' : 'No'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </details>
+              `;
+            }
+            
+            // Add raw data in a collapsible section
+            const rawDataHTML = `
+              <details>
+                <summary>Raw Data</summary>
+                <div class="details-content">
+                  <pre>${JSON.stringify(result, null, 2)}</pre>
+                </div>
+              </details>
+            `;
+            
+            // Combine all sections
+            resultElement.innerHTML = verdictHTML + metadataHTML + rawDataHTML;
+          } else {
+            // Handle unexpected result format
+            resultElement.innerHTML = `
+              <div class="match-result match-error">
+                <h3>Error Processing Result</h3>
+                <p>The response format was different than expected.</p>
+              </div>
+              <details>
+                <summary>Raw Data</summary>
+                <div class="details-content">
+                  <pre>${JSON.stringify(result, null, 2)}</pre>
+                </div>
+              </details>
+            `;
+          }
+        } catch (formatError) {
+          console.error("Error formatting result:", formatError);
+          resultElement.innerHTML = `
+            <div class="match-result match-error">
+              <h3>Error Formatting Result</h3>
+              <p>${formatError.message}</p>
+            </div>
+            <details>
+              <summary>Raw Data</summary>
+              <div class="details-content">
+                <pre>${JSON.stringify(result, null, 2)}</pre>
+              </div>
+            </details>
+          `;
+        }
+      } catch (error) {
+        console.error("API Error:", error);
+        resultElement.innerHTML = `
+          <div class="match-result match-error">
+            <h3>API Error</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    };
+  </script>
+
+</body>
+</html>
